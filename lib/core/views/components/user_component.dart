@@ -1,4 +1,4 @@
-import 'package:api_with_provider/user_model.dart';
+import 'package:api_with_provider/core/models/user_model.dart';
 import 'package:flutter/material.dart';
 
 class UserComponent extends StatelessWidget {

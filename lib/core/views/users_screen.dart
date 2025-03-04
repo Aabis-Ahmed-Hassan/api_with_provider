@@ -1,9 +1,9 @@
-import 'package:api_with_provider/user_component.dart';
-import 'package:api_with_provider/user_provider.dart';
+import 'package:api_with_provider/core/views/components/user_component.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import 'user_model.dart';
+import '../models/user_model.dart';
+import '../view_models/user_viewmodel.dart';
 
 class UsersScreen extends StatefulWidget {
   const UsersScreen({super.key});
@@ -17,49 +17,69 @@ class _UsersScreenState extends State<UsersScreen> {
   void initState() {
     // TODO: implement initState
     super.initState();
-    Provider.of<UserProvider>(context, listen: false).getUsers(context);
+    Provider.of<UserViewModel>(context, listen: false).getUsers();
   }
 
   @override
   Widget build(BuildContext context) {
-    final provider = Provider.of<UserProvider>(context, listen: false);
+    final provider = Provider.of<UserViewModel>(context, listen: false);
 
     debugPrint('users screen');
     return Scaffold(
-      body: RefreshIndicator(
-        onRefresh: () async {
-          provider.getUsers(context);
-        },
-        child: Consumer<UserProvider>(
-          builder: (context, value, child) {
-            return value.isLoading
-                // show loading while the data is being fetched
-                ? Center(child: CircularProgressIndicator())
-                : Center(
-                    child: value.users.isEmpty
-                        // if there is no data in the list, show it
-                        // using listview because the RefreshIndicator widget works in listview
-                        ? ListView(
-                            children: [
-                              Center(
-                                child: Text(
-                                  'No Data',
-                                  textAlign: TextAlign.center,
-                                ),
-                              ),
-                            ],
-                          )
-                        // show the users when the data is fetched successfully
-                        : ListView.builder(
-                            itemCount: value.users.length,
-                            itemBuilder: (context, index) {
-                              UserModel user = value.users[index];
-                              return UserComponent(user: user);
-                            },
+      body: Consumer<UserViewModel>(
+        builder: (context, value, child) {
+          // loading
+          if (value.isLoading) {
+            Center(child: CircularProgressIndicator());
+          }
+          // error occured
+          if (value.users.isEmpty) {
+            return RefreshIndicator(
+              onRefresh: () async {
+                value.getUsers();
+              },
+              child: ListView(
+                children: [
+                  Center(
+                    child: Text(
+                      value.errorMessage!,
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                ],
+              ),
+            );
+          }
+          // no error, no probelm
+          return RefreshIndicator(
+            onRefresh: () async {
+              provider.getUsers();
+            },
+            child: Center(
+              child: value.users.isEmpty
+                  // if there is no data in the list, show it
+                  // using listview because the RefreshIndicator widget works in listview
+                  ? ListView(
+                      children: [
+                        Center(
+                          child: Text(
+                            value.errorMessage!,
+                            textAlign: TextAlign.center,
                           ),
-                  );
-          },
-        ),
+                        ),
+                      ],
+                    )
+                  // show the users when the data is fetched successfully
+                  : ListView.builder(
+                      itemCount: value.users.length,
+                      itemBuilder: (context, index) {
+                        UserModel user = value.users[index];
+                        return UserComponent(user: user);
+                      },
+                    ),
+            ),
+          );
+        },
       ),
     );
   }

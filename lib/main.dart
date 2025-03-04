@@ -1,5 +1,5 @@
-import 'package:api_with_provider/user_provider.dart';
-import 'package:api_with_provider/users_screen.dart';
+import 'package:api_with_provider/core/view_models/user_viewmodel.dart';
+import 'package:api_with_provider/core/views/users_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -13,7 +13,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
-      create: (context) => UserProvider(),
+      create: (context) => UserViewModel(),
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
         theme: ThemeData(
